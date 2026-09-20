@@ -1,27 +1,52 @@
-TARGET := payload
+TARGET := payload.bin
+
+LIBPS4 := $(PS4SDK)/libPS4
+
+CC := gcc
+OBJCOPY := objcopy
+
+ODIR := build
+
+CFLAGS := -I$(LIBPS4)/include
+CFLAGS += -Iinclude
+CFLAGS += -Os
+CFLAGS += -std=c11
+CFLAGS += -ffunction-sections
+CFLAGS += -fdata-sections
+CFLAGS += -fno-builtin
+CFLAGS += -nostdlib
+CFLAGS += -Wall
+CFLAGS += -Wextra
+CFLAGS += -m64
+CFLAGS += -fpie
+CFLAGS += -fPIC
+
+LFLAGS := -L$(LIBPS4)
+LFLAGS += -T$(LIBPS4)/linker.x
+LFLAGS += -Wl,--build-id=none
+LFLAGS += -Wl,--gc-sections
+
+LIBS := -lPS4
 
 SRCS := main.c
-
-CC := clang
-LD := ld.lld
-
-CFLAGS := -O2 -Wall -Wextra
-CFLAGS += -ffreestanding
-CFLAGS += -fno-stack-protector
-CFLAGS += -fno-builtin
-
-INCLUDES := -I/lib/ps4-payload-sdk/libPS4/include
-
-LDFLAGS :=
-LIBS :=
-
-$(TARGET): $(SRCS)
-	$(CC) $(CFLAGS) $(INCLUDES) -c $(SRCS) -o main.o
-	$(LD) $(LDFLAGS) main.o $(LIBS) -o $(TARGET).elf
+OBJS := $(ODIR)/main.o
 
 .PHONY: all clean
 
 all: $(TARGET)
 
+$(TARGET): $(OBJS)
+	$(CC) $(LIBPS4)/crt0.s $(OBJS) \
+		$(CFLAGS) \
+		$(LFLAGS) \
+		$(LIBS) \
+		-o temp.elf
+	$(OBJCOPY) -O binary temp.elf $(TARGET)
+	rm -f temp.elf
+
+$(ODIR)/main.o: main.c
+	mkdir -p $(ODIR)
+	$(CC) $(CFLAGS) -c main.c -o $(ODIR)/main.o
+
 clean:
-	rm -f main.o $(TARGET).elf $(TARGET).bin
+	rm -rf $(ODIR) $(TARGET) temp.elf
