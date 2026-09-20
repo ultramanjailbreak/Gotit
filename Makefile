@@ -1,17 +1,17 @@
-# Define the final output file name
+# Define the target name
 TARGET = payload
 
-# The target system layout format for Orbis OS
-CompilerTarget = freebsd
+# Let the compiler find the online SDK path dynamically
+PS4SDK ?= /lib/ps4-payload-sdk
 
-# Include standard compiler flags and definitions from the SDK
+# Explicitly pull the internal builder configurations
 include $(PS4SDK)/defs.mk
 
-# Add your source files here (main.c is our entry point)
+# Point to your primary main file
 SRCS = main.c
 
-# Link the core system kernels and standard C library functions
+# Link essential runtime libraries
 LIBS = -lkernel -lc
 
-# Include the automated linking rules to generate the .bin output
+# Execute final binary compilation mechanics
 include $(PS4SDK)/rules.mk
