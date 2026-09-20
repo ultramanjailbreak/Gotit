@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -15,14 +14,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build PS4 Payload
+      - name: Build
         uses: Scene-Collective/ps4-payload-sdk@v1.0.0
         with:
           app_path: .
           build_command: make
 
-      - name: Show build files
-        if: success()
+      - name: Find payload
         run: |
-          echo "Build completed"
-          find . -maxdepth 3 -type f -print
+          echo "Looking for build output..."
+          find . -type f \( -name "*.bin" -o -name "*.elf" \) -print
+
+      - name: Upload payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ps4-payload
+          path: |
+            payload.bin
+            *.elf
+          if-no-files-found: error
