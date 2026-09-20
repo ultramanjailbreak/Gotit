@@ -20,32 +20,15 @@ jobs:
           app_path: .
           build_command: make
 
-      - name: Find build output
+      - name: Check payload
         run: |
-          echo "Build output:"
-          find . -type f \( -name "*.bin" -o -name "*.elf" \) -print
-
-      - name: Prepare payload
-        run: |
-          set -e
-
-          PAYLOAD=$(find . -type f -name "payload.bin" | head -n 1)
-
-          if [ -z "$PAYLOAD" ]; then
-            echo "ERROR: payload.bin was not found."
-            echo "All .bin files:"
-            find . -type f -name "*.bin" -print
-            exit 1
-          fi
-
-          echo "Found payload: $PAYLOAD"
-          cp "$PAYLOAD" ./payload.bin
-
-          ls -lh ./payload.bin
+          echo "Checking for payload.bin..."
+          ls -lah payload.bin
+          file payload.bin
 
       - name: Upload payload
         uses: actions/upload-artifact@v4
         with:
           name: ps4-payload
-          path: payload.bin
+          path: ./payload.bin
           if-no-files-found: error
