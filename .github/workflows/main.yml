@@ -1,23 +1,29 @@
-name: Compile Payload Online
+name: Build PS4 Payload
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build with PS4 Payload SDK
-        # Fixed the version tag below from @v1 to @v1.0.0
-        uses: Scene-Collective/ps4-payload-sdk@v1.0.0
+      - name: Build PS4 Payload
+        uses: Scene-Collective/ps4-payload-sdk@v1
         with:
-          app_path: '.'
-          build_command: 'make'
+          app_path: .
+          build_command: make
 
-      - name: Save Completed Binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: compiled-payload
-          path: payload.bin
+      - name: List build output
+        run: |
+          echo "Build completed."
+          find . -maxdepth 3 -type f \
+            \( -name "*.bin" -o -name "*.elf" \) \
+            -print
