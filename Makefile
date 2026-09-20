@@ -1,14 +1,14 @@
-# Define the target output name
+# Define the output file name
 TARGET = payload
 
-# Let the automated compiler load its internal configuration files directly
-include defs.mk
+# Use the environment variable provided by the Docker runner
+include $(PS4SDK)/defs.mk
 
-# Point to your primary main file
+# Specify your source file
 SRCS = main.c
 
-# Link essential runtime libraries
+# Link the core system libraries
 LIBS = -lkernel -lc
 
-# Execute final binary compilation mechanics
-include rules.mk
+# Include the automated build rules
+include $(PS4SDK)/rules.mk
