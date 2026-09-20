@@ -1,14 +1,27 @@
-# Define the output file name
-TARGET = payload
+TARGET := payload
 
-# Use the environment variable provided by the Docker runner
-include $(PS4SDK)/defs.mk
+SRCS := main.c
 
-# Specify your source file
-SRCS = main.c
+CC := clang
+LD := ld.lld
 
-# Link the core system libraries
-LIBS = -lkernel -lc
+CFLAGS := -O2 -Wall -Wextra
+CFLAGS += -ffreestanding
+CFLAGS += -fno-stack-protector
+CFLAGS += -fno-builtin
 
-# Include the automated build rules
-include $(PS4SDK)/rules.mk
+INCLUDES := -I/lib/ps4-payload-sdk/libPS4/include
+
+LDFLAGS :=
+LIBS :=
+
+$(TARGET): $(SRCS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(SRCS) -o main.o
+	$(LD) $(LDFLAGS) main.o $(LIBS) -o $(TARGET).elf
+
+.PHONY: all clean
+
+all: $(TARGET)
+
+clean:
+	rm -f main.o $(TARGET).elf $(TARGET).bin
